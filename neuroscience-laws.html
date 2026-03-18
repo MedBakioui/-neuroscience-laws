@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroCode — Les Lois du Cerveau</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07080f;--surface:#0d1020;--border:#1e2240;--a1:#7c6af7;--a2:#e05aff;--a3:#00e5c0;--text:#e8eaf6;--muted:#7b82a8;--card:#10132a;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Space Mono',monospace;overflow-x:hidden;cursor:none;}
+.cursor{width:10px;height:10px;background:var(--a1);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:screen;transition:width .2s,height .2s,background .2s;}
+.cursor.h{width:20px;height:20px;background:var(--a2);}
+.ring{width:32px;height:32px;border:1px solid rgba(124,106,247,.45);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:left .07s,top .07s;}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");pointer-events:none;z-index:999;}
+
+/* NAV */
+nav{position:fixed;top:1.2rem;left:50%;transform:translateX(-50%);background:rgba(7,8,15,.85);backdrop-filter:blur(24px);border:1px solid var(--border);border-radius:100px;padding:.5rem .55rem;z-index:500;display:flex;gap:.15rem;align-items:center;}
+.logo{font-family:'Playfair Display',serif;font-size:.9rem;font-weight:900;background:linear-gradient(135deg,var(--a1),var(--a2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;padding:0 .8rem 0 .4rem;border-right:1px solid var(--border);margin-right:.3rem;}
+.nl{font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-decoration:none;padding:.42rem .85rem;border-radius:100px;transition:color .2s,background .2s;white-space:nowrap;cursor:none;border:none;background:transparent;font-family:'Space Mono',monospace;}
+.nl:hover,.nl.on{color:var(--text);background:var(--border);}
+
+/* PAGES */
+.pg{display:none;min-height:100vh;}.pg.on{display:block;}
+
+/* SHARED */
+.lbl{font-size:.58rem;letter-spacing:.28em;color:var(--a1);text-transform:uppercase;margin-bottom:.8rem;}
+.ttl{font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3.2rem);font-weight:700;margin-bottom:1rem;}
+.sub{color:var(--muted);font-size:.76rem;line-height:1.95;max-width:540px;margin-bottom:3rem;}
+.ph{max-width:1200px;margin:0 auto;padding:8rem 2rem 3rem;}
+.wrap{max-width:1200px;margin:0 auto;padding:0 2rem 6rem;}
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .65s ease,transform .65s ease;}
+.reveal.vis{opacity:1;transform:none;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px);}to{opacity:1;transform:none;}}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(18px,-28px) scale(1.03);}}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.82rem 2rem;border-radius:100px;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;font-family:'Space Mono',monospace;cursor:none;transition:transform .2s,box-shadow .2s;border:none;}
+.btn-p{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(124,106,247,.3);}
+.btn-g{background:transparent;border:1px solid var(--border);color:var(--text);}
+.btn-g:hover{border-color:var(--a1);background:rgba(124,106,247,.06);}
+
+/* ========== HOME ========== */
+header{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:6rem 2rem 4rem;position:relative;overflow:hidden;}
+.hgrid{position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:60px 60px;opacity:.22;mask-image:radial-gradient(ellipse at center,black 30%,transparent 75%);}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none;}
+.o1{width:600px;height:600px;background:radial-gradient(circle,rgba(124,106,247,.15),transparent);top:-150px;left:-150px;animation:float 10s ease-in-out infinite;}
+.o2{width:400px;height:400px;background:radial-gradient(circle,rgba(224,90,255,.1),transparent);bottom:-80px;right:-80px;animation:float 8s ease-in-out infinite reverse;}
+.o3{width:350px;height:350px;background:radial-gradient(circle,rgba(0,229,192,.08),transparent);top:50%;left:50%;transform:translate(-50%,-50%);animation:float 12s ease-in-out infinite;}
+.badge{font-size:.58rem;letter-spacing:.25em;color:var(--a3);text-transform:uppercase;border:1px solid rgba(0,229,192,.35);padding:.32rem 1.1rem;border-radius:100px;margin-bottom:2rem;position:relative;animation:fadeUp .8s ease both;}
+h1{font-family:'Playfair Display',serif;font-size:clamp(3.2rem,9vw,8rem);font-weight:900;line-height:.95;position:relative;animation:fadeUp .9s .1s ease both;}
+.gt{background:linear-gradient(135deg,var(--a1) 0%,var(--a2) 50%,var(--a3) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hsub{max-width:490px;margin:1.8rem auto 0;color:var(--muted);font-size:.77rem;line-height:2;position:relative;animation:fadeUp 1s .2s ease both;}
+.stats{display:flex;gap:3rem;justify-content:center;margin-top:4rem;position:relative;animation:fadeUp 1s .4s ease both;}
+.sn{font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:900;background:linear-gradient(135deg,var(--a1),var(--a2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.sl{font-size:.58rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-top:.3rem;}
+.hcta{display:flex;gap:1rem;justify-content:center;margin-top:3rem;flex-wrap:wrap;position:relative;animation:fadeUp 1s .55s ease both;}
+.shint{position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.5rem;color:var(--muted);font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;animation:fadeUp 1.2s .8s ease both;}
+.sline{width:1px;height:40px;background:linear-gradient(to bottom,var(--a1),transparent);animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+.frow{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1px;background:var(--border);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.fi{background:var(--bg);padding:2.5rem 2rem;}
+.fi-ic{font-size:1.8rem;margin-bottom:1rem;}
+.fi-t{font-family:'Playfair Display',serif;font-size:1.05rem;margin-bottom:.5rem;}
+.fi-d{font-size:.7rem;color:var(--muted);line-height:1.8;}
+
+.prev-sec{max-width:1200px;margin:0 auto;padding:6rem 2rem;}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+.pc{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.8rem;position:relative;overflow:hidden;transition:transform .3s,border-color .3s;cursor:none;}
+.pc:hover{transform:translateY(-4px);border-color:var(--ca,var(--a1));}
+.pc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--ca,var(--a1));}
+.pn{font-size:.58rem;letter-spacing:.2em;color:var(--muted);margin-bottom:.7rem;}
+.pi{font-size:1.6rem;margin-bottom:.7rem;}
+.pname{font-family:'Playfair Display',serif;font-size:1.05rem;margin-bottom:.3rem;}
+.ptag{font-size:.58rem;color:var(--ca,var(--a1));letter-spacing:.1em;text-transform:uppercase;}
+
+/* ========== LAWS ========== */
+.lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:1.5rem;max-width:1200px;margin:0 auto;padding:0 2rem 6rem;}
+.lc{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:2.2rem;position:relative;overflow:hidden;transition:transform .3s,border-color .3s;cursor:none;}
+.lc:hover{transform:translateY(-6px);border-color:var(--ca);}
+.lc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--ca),transparent);}
+.lc::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.025),transparent 55%);pointer-events:none;}
+.cn{font-size:.58rem;letter-spacing:.2em;color:var(--muted);margin-bottom:1rem;}
+.ci{width:50px;height:50px;border-radius:13px;background:color-mix(in srgb,var(--ca) 14%,transparent);display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1.2rem;}
+.cname{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;margin-bottom:.35rem;}
+.csub{font-size:.6rem;color:var(--ca);letter-spacing:.12em;text-transform:uppercase;margin-bottom:1rem;}
+.cdesc{font-size:.74rem;color:var(--muted);line-height:1.9;margin-bottom:1.5rem;}
+.cbox{background:color-mix(in srgb,var(--ca) 7%,transparent);border:1px solid color-mix(in srgb,var(--ca) 22%,transparent);border-radius:10px;padding:1rem 1.1rem;}
+.cbox-l{font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--ca);margin-bottom:.4rem;}
+.cbox-t{font-size:.7rem;color:var(--text);line-height:1.75;}
+
+/* ========== APPLICATION ========== */
+.tabs{display:flex;gap:.4rem;border-bottom:1px solid var(--border);margin-bottom:3rem;overflow-x:auto;padding-bottom:0;}
+.tab{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;padding:.65rem 1.1rem;color:var(--muted);border-bottom:2px solid transparent;cursor:none;transition:color .2s,border-color .2s;white-space:nowrap;background:transparent;border-top:none;border-left:none;border-right:none;font-family:'Space Mono',monospace;}
+.tab:hover,.tab.on{color:var(--a1);border-bottom-color:var(--a1);}
+.tc{display:none;}.tc.on{display:block;}
+.og{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-bottom:3rem;}
+.oc{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem;}
+.och{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;}
+.oic{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;}
+.ot{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;}
+.os{font-size:.58rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+.steps{list-style:none;display:flex;flex-direction:column;gap:.8rem;}
+.si{display:flex;gap:.8rem;align-items:flex-start;}
+.snum{width:20px;height:20px;border-radius:6px;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:.56rem;color:var(--muted);flex-shrink:0;margin-top:1px;}
+.st{font-size:.7rem;color:var(--muted);line-height:1.75;}
+.st strong{color:var(--text);}
+.pb{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:2.5rem;margin-bottom:2rem;}
+.pt{font-family:'Playfair Display',serif;font-size:1.4rem;margin-bottom:.4rem;}
+.ps{font-size:.68rem;color:var(--muted);margin-bottom:2rem;}
+.pr{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:1rem;}
+.pri{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1rem;}
+.prt{font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--a3);margin-bottom:.4rem;}
+.pra{font-size:.7rem;color:var(--text);line-height:1.6;}
+.prl{font-size:.58rem;color:var(--muted);margin-top:.4rem;}
+.map-wrap{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:2.5rem;}
+.map-title{font-family:'Playfair Display',serif;font-size:1.4rem;margin-bottom:2rem;}
+.map-row{display:flex;align-items:stretch;gap:0;margin-bottom:2px;}
+.map-lname{width:175px;flex-shrink:0;font-size:.66rem;color:var(--text);padding:.85rem;background:var(--bg);border:1px solid var(--border);border-right:none;border-radius:8px 0 0 8px;display:flex;align-items:center;}
+.map-bars{flex:1;display:flex;background:var(--bg);border:1px solid var(--border);border-left:none;border-radius:0 8px 8px 0;overflow:hidden;}
+.map-bar{height:100%;display:flex;align-items:center;padding:.85rem .6rem;font-size:.55rem;color:rgba(255,255,255,.85);}
+
+/* ========== ROUTINES ========== */
+.rsel{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:3rem;}
+.rb{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;text-align:left;cursor:none;transition:border-color .2s,transform .2s;background-color:var(--card);}
+.rb:hover,.rb.on{border-color:var(--a1);transform:translateY(-2px);}
+.rb-ic{font-size:1.8rem;margin-bottom:.6rem;}
+.rb-t{font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:.3rem;}
+.rb-d{font-size:.63rem;color:var(--muted);line-height:1.65;}
+.rplan{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;}
+.rph{padding:2rem 2.5rem;border-bottom:1px solid var(--border);background:linear-gradient(135deg,rgba(124,106,247,.06),rgba(224,90,255,.04));}
+.rpt{font-family:'Playfair Display',serif;font-size:1.7rem;margin-bottom:.3rem;}
+.rps{font-size:.68rem;color:var(--muted);}
+.tl{padding:2.5rem;display:flex;flex-direction:column;gap:0;}
+.tli{display:flex;gap:1.5rem;position:relative;padding-bottom:2rem;}
+.tli:last-child{padding-bottom:0;}
+.tll{display:flex;flex-direction:column;align-items:center;width:72px;flex-shrink:0;}
+.tltime{font-size:.62rem;color:var(--a3);letter-spacing:.1em;margin-bottom:.6rem;text-align:center;}
+.tldot{width:11px;height:11px;border-radius:50%;border:2px solid var(--a1);background:var(--bg);flex-shrink:0;z-index:1;}
+.tlline{width:1px;flex:1;background:var(--border);}
+.tli:last-child .tlline{display:none;}
+.tlr{flex:1;padding-bottom:.5rem;}
+.tlt{font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:.4rem;}
+.tld{font-size:.7rem;color:var(--muted);line-height:1.8;margin-bottom:.6rem;}
+.tltags{display:flex;gap:.35rem;flex-wrap:wrap;}
+.tltag{font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;padding:.22rem .55rem;border-radius:100px;background:rgba(124,106,247,.12);color:var(--a1);border:1px solid rgba(124,106,247,.2);}
+.tltag.g{background:rgba(0,229,192,.1);color:var(--a3);border-color:rgba(0,229,192,.2);}
+.tltag.p{background:rgba(224,90,255,.1);color:var(--a2);border-color:rgba(224,90,255,.2);}
+.rd{display:none;}.rd.on{display:block;}
+
+/* ========== ABOUT ========== */
+.manifesto{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:3rem;margin-bottom:2rem;position:relative;overflow:hidden;}
+.manifesto::before{content:'"';position:absolute;top:-1rem;left:1.5rem;font-family:'Playfair Display',serif;font-size:8rem;color:var(--a1);opacity:.12;line-height:1;}
+.manifesto p{font-family:'Playfair Display',serif;font-size:1.25rem;line-height:1.75;font-style:italic;position:relative;}
+.pgrid2{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-bottom:2rem;}
+.pill{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.8rem;}
+.pill-ic{font-size:1.6rem;margin-bottom:.8rem;}
+.pill-t{font-family:'Playfair Display',serif;font-size:1.05rem;margin-bottom:.5rem;}
+.pill-tx{font-size:.7rem;color:var(--muted);line-height:1.82;}
+.tracker-sec{background:linear-gradient(135deg,rgba(124,106,247,.06),rgba(0,229,192,.04));border:1px solid var(--border);border-radius:18px;padding:2.5rem;margin-bottom:2rem;}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:1rem;}
+.tcard{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:1.2rem;}
+.tlaw{font-size:.6rem;color:var(--text);margin-bottom:.8rem;}
+.tbg{height:4px;background:var(--border);border-radius:100px;overflow:hidden;margin-bottom:.5rem;}
+.tfill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--a1),var(--a2));transition:width 1.2s ease;}
+.tpct{font-size:.58rem;color:var(--muted);}
+.tchk{display:flex;align-items:center;gap:.5rem;margin-top:.6rem;font-size:.58rem;color:var(--muted);cursor:none;}
+.tchk input{accent-color:var(--a1);}
+.refs{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:2rem;}
+.refs-t{font-family:'Playfair Display',serif;font-size:1.05rem;margin-bottom:1.2rem;}
+.rlist{list-style:none;display:flex;flex-direction:column;gap:.7rem;}
+.ri{display:flex;gap:.8rem;align-items:flex-start;}
+.rb2{width:6px;height:6px;border-radius:50%;background:var(--a1);flex-shrink:0;margin-top:.45rem;}
+.rt{font-size:.68rem;color:var(--muted);line-height:1.75;}
+.rt em{color:var(--a3);font-style:normal;}
+
+@media(max-width:800px){.pgrid,.rsel{grid-template-columns:1fr;}.pgrid2{grid-template-columns:1fr;}}
+@media(max-width:700px){.nl{padding:.4rem .5rem;font-size:.52rem;}.logo{padding-right:.55rem;}}
+</style>
+</head>
+<body>
+<div class="cursor" id="cur"></div>
+<div class="ring" id="ring"></div>
+
+<nav>
+  <span class="logo">NeuroCode</span>
+  <button class="nl on" data-p="home" onclick="go('home')">Accueil</button>
+  <button class="nl" data-p="laws" onclick="go('laws')">Les Lois</button>
+  <button class="nl" data-p="app" onclick="go('app')">Application</button>
+  <button class="nl" data-p="routines" onclick="go('routines')">Routines</button>
+  <button class="nl" data-p="about" onclick="go('about')">À propos</button>
+</nav>
+
+<!-- HOME -->
+<div id="pg-home" class="pg on">
+  <header>
+    <div class="hgrid"></div>
+    <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
+    <div class="badge">Neuroscience · Cognition · Performance</div>
+    <h1>Les Lois du<br><span class="gt">Cerveau</span></h1>
+    <p class="hsub">9 principes scientifiques fondamentaux pour transformer votre apprentissage, votre discipline et votre performance au quotidien.</p>
+    <div class="stats">
+      <div><div class="sn">9</div><div class="sl">Lois fondamentales</div></div>
+      <div><div class="sn">4</div><div class="sl">Domaines clés</div></div>
+      <div><div class="sn">∞</div><div class="sl">Applications</div></div>
+    </div>
+    <div class="hcta">
+      <button class="btn btn-p" onclick="go('laws')">Explorer les lois →</button>
+      <button class="btn btn-g" onclick="go('routines')">Voir les routines</button>
+    </div>
+    <div class="shint"><div class="sline"></div>Défiler</div>
+  </header>
+  <div class="frow">
+    <div class="fi"><div class="fi-ic">🧬</div><div class="fi-t">Basé sur la science</div><div class="fi-d">Chaque principe est ancré dans la recherche en neurosciences cognitives et behaviorales récentes.</div></div>
+    <div class="fi"><div class="fi-ic">⚙️</div><div class="fi-t">Applicable dès aujourd'hui</div><div class="fi-d">Des protocoles concrets traduits en routines quotidiennes actionnables et mesurables immédiatement.</div></div>
+    <div class="fi"><div class="fi-ic">📈</div><div class="fi-t">Résultats progressifs</div><div class="fi-d">La compréhension de ces lois permet d'optimiser chaque domaine de votre vie avec précision et méthode.</div></div>
+    <div class="fi"><div class="fi-ic">🎯</div><div class="fi-t">Orienté objectifs</div><div class="fi-d">Chaque loi est mise en contexte selon vos aspirations : trading, sport, apprentissage, discipline.</div></div>
+  </div>
+  <div class="prev-sec">
+    <div class="lbl">// Aperçu des lois</div>
+    <h2 class="ttl">Les 9 Lois Essentielles</h2>
+    <p class="sub">Chaque loi est un levier direct sur vos performances. Explorez-les en détail pour les intégrer à votre pratique.</p>
+    <div class="pgrid" id="pvGrid"></div>
+    <div style="text-align:center;margin-top:2.5rem;"><button class="btn btn-p" onclick="go('laws')">Voir toutes les lois →</button></div>
+  </div>
+</div>
+
+<!-- LAWS -->
+<div id="pg-laws" class="pg">
+  <div class="ph">
+    <div class="lbl">// Principes fondamentaux</div>
+    <h2 class="ttl">Les 9 Lois du Cerveau</h2>
+    <p class="sub">Des principes qui régissent la mémoire, la motivation, l'apprentissage et la performance — comprenez-les pour les exploiter chaque jour.</p>
+  </div>
+  <div class="lgrid" id="lwGrid"></div>
+</div>
+
+<!-- APPLICATION -->
+<div id="pg-app" class="pg">
+  <div class="ph">
+    <div class="lbl">// Mise en pratique</div>
+    <h2 class="ttl">Application Pratique</h2>
+    <p class="sub">Traduire la théorie en action concrète. Choisissez votre domaine et découvrez comment activer chaque loi au quotidien.</p>
+  </div>
+  <div class="wrap">
+    <div class="tabs">
+      <button class="tab on" onclick="showTab('trading',this)">Trading</button>
+      <button class="tab" onclick="showTab('appr',this)">Apprentissage</button>
+      <button class="tab" onclick="showTab('sport',this)">Sport & Discipline</button>
+      <button class="tab" onclick="showTab('proto',this)">Protocoles</button>
+      <button class="tab" onclick="showTab('map',this)">Carte des lois</button>
+    </div>
+
+    <div class="tc on" id="tc-trading">
+      <div class="og">
+        <div class="oc reveal"><div class="och"><div class="oic" style="background:rgba(124,106,247,.15)">📊</div><div><div class="ot">Gestion émotionnelle</div><div class="os">Yerkes-Dodson · Dopamine</div></div></div><ul class="steps"><li class="si"><div class="snum">1</div><div class="st">Identifiez votre <strong>arousal optimal</strong> avant chaque position</div></li><li class="si"><div class="snum">2</div><div class="st">Créez un <strong>rituel pré-trade</strong> de 5 min : respiration + revue du plan</div></li><li class="si"><div class="snum">3</div><div class="st">Ne tradez jamais après une <strong>série de pertes</strong> sans reset émotionnel</div></li><li class="si"><div class="snum">4</div><div class="st">Célébrez le <strong>respect du plan</strong>, pas le profit — dopamine bien orientée</div></li></ul></div>
+        <div class="oc reveal"><div class="och"><div class="oic" style="background:rgba(0,229,192,.12)">🧩</div><div><div class="ot">Analyse & décision</div><div class="os">Charge cognitive · Attention</div></div></div><ul class="steps"><li class="si"><div class="snum">1</div><div class="st">Limitez votre setup à <strong>3-4 critères max</strong> pour préserver la mémoire de travail</div></li><li class="si"><div class="snum">2</div><div class="st">Analysez en <strong>fenêtre bloquée</strong> : pas de charts en continu</div></li><li class="si"><div class="snum">3</div><div class="st">Externalisez vos règles en <strong>checklists écrites</strong> pour libérer le CPU mental</div></li><li class="si"><div class="snum">4</div><div class="st">Réduisez le bruit : <strong>1 paire, 1 stratégie</strong> à la fois</div></li></ul></div>
+        <div class="oc reveal"><div class="och"><div class="oic" style="background:rgba(224,90,255,.12)">🔁</div><div><div class="ot">Apprentissage du trading</div><div class="os">Hebb · Ebbinghaus</div></div></div><ul class="steps"><li class="si"><div class="snum">1</div><div class="st">Backtestez <strong>200+ trades</strong> pour imprimer les patterns visuellement</div></li><li class="si"><div class="snum">2</div><div class="st">Tenez un <strong>journal de trade</strong> : révision J+1, S+1, M+1</div></li><li class="si"><div class="snum">3</div><div class="st">Rejouez vos <strong>meilleurs setups</strong> en simulation quotidienne</div></li><li class="si"><div class="snum">4</div><div class="st">Dormez bien : la consolidation valide les <strong>patterns inconscients</strong></div></li></ul></div>
+      </div>
+      <div class="pb reveal"><div class="pt">Journée type du Trader Neuroscient</div><div class="ps">Protocole basé sur l'optimisation cognitive et émotionnelle — 8 blocs clés</div><div class="pr"><div class="pri"><div class="prt">06:00</div><div class="pra">Réveil · 10 min méditation · Hydratation</div><div class="prl">→ Cortisol naturel optimal</div></div><div class="pri"><div class="prt">06:30</div><div class="pra">30 min cardio léger avant analyse</div><div class="prl">→ Loi du BDNF</div></div><div class="pri"><div class="prt">07:30</div><div class="pra">Revue du marché · Journal de la veille</div><div class="prl">→ Ebbinghaus J+1</div></div><div class="pri"><div class="prt">08:30</div><div class="pra">Session de trading principale (2-3h max)</div><div class="prl">→ Attention sélective</div></div><div class="pri"><div class="prt">12:00</div><div class="pra">Pause · Déjeuner · Pas de charts</div><div class="prl">→ Reset cognitif</div></div><div class="pri"><div class="prt">14:00</div><div class="pra">Analyse post-session · Journal de trade</div><div class="prl">→ Consolidation Hebb</div></div><div class="pri"><div class="prt">16:00</div><div class="pra">Étude : backtest ou formation 1h</div><div class="prl">→ Neuroplasticité</div></div><div class="pri"><div class="prt">22:00</div><div class="pra">Pas d'écrans · Lecture · Sommeil 8h</div><div class="prl">→ Consolidation mémorielle</div></div></div></div>
+    </div>
+
+    <div class="tc" id="tc-appr">
+      <div class="og">
+        <div class="oc reveal"><div class="och"><div class="oic" style="background:rgba(0,229,192,.12)">📚</div><div><div class="ot">Mémorisation profonde</div><div class="os">Ebbinghaus · Hebb</div></div></div><ul class="steps"><li class="si"><div class="snum">1</div><div class="st">Révisez à <strong>J+1, J+7, J+30</strong> — répétition espacée</div></li><li class="si"><div class="snum">2</div><div class="st">Utilisez <strong>Anki</strong> pour des flashcards à intervalles croissants</div></li><li class="si"><div class="snum">3</div><div class="st"><strong>Testez-vous</strong> plutôt que de relire : 3x plus puissant</div></li><li class="si"><div class="snum">4</div><div class="st">Étudiez 1h avant le sommeil pour une <strong>double consolidation</strong></div></li></ul></div>
+        <div class="oc reveal"><div class="och"><div class="oic" style="background:rgba(124,106,247,.15)">🎯</div><div><div class="ot">Focus & productivité</div><div class="os">Attention · Charge cognitive</div></div></div><ul class="steps"><li class="si"><div class="snum">1</div><div class="st">Blocs de <strong>90 minutes</strong> de travail profond sans interruption</div></li><li class="si"><div class="snum">2</div><div class="st"><strong>1 seul objectif</strong> par bloc — pas de multitâche</div></li><li class="si"><div class="snum">3</div><div class="st">Créez un <strong>environnement dédié</strong> pour conditionner le cerveau</div></li><li class="si"><div class="snum">4</div><div class="st">Pause de 20 min entre blocs pour la <strong>récupération attentionnelle</strong></div></li></ul></div>
+        <div class="oc reveal"><div class="och"><div class="oic" style="background:rgba(247,167,106,.15)">🚀</div><div><div class="ot">Motivation durable</div><div class="os">Dopamine · Neuroplasticité</div></div></div><ul class="steps"><li class="si"><div class="snum">1</div><div class="st">Fixez des <strong>micro-objectifs de 48h</strong> pour entretenir la dopamine</div></li><li class="si"><div class="snum">2</div><div class="st">Ajoutez du <strong>défi progressif</strong> : restez légèrement inconfortable</div></li><li class="si"><div class="snum">3</div><div class="st">Un <strong>tracker visuel</strong> du progrès booste la motivation durablement</div></li><li class="si"><div class="snum">4</div><div class="st">Récompensez le <strong>processus</strong>, pas seulement le résultat final</div></li></ul></div>
+      </div>
+      <div class="pb reveal"><div class="pt">Protocole de Révision Espacée</div><div class="ps">Basé sur la courbe d'Ebbinghaus — multipliez votre rétention par 4</div><div class="pr"><div class="pri"><div class="prt">Jour 0</div><div class="pra">Apprentissage initial — prise de notes actives et structurées</div></div><div class="pri"><div class="prt">Jour 1</div><div class="pra">1ère révision rapide (15 min) avant que l'oubli massif s'installe</div></div><div class="pri"><div class="prt">Jour 7</div><div class="pra">2ème révision — auto-test sans regarder les notes</div></div><div class="pri"><div class="prt">Jour 30</div><div class="pra">3ème révision — application pratique du concept étudié</div></div><div class="pri"><div class="prt">Jour 90</div><div class="pra">4ème révision — enseignez le concept à quelqu'un d'autre</div></div></div></div>
+    </div>
+
+    <div class="tc" id="tc-sport">
+      <div class="og">
+        <div class="oc reveal"><div class="och"><div class="oic" style="background:rgba(0,229,192,.12)">💪</div><div><div class="ot">Construction d'habitudes</div><div class="os">Hebb · Dopamine</div></div></div><ul class="steps"><li class="si"><div class="snum">1</div><div class="st">Fixez une <strong>heure fixe</strong> chaque jour : le contexte devient le déclencheur</div></li><li class="si"><div class="snum">2</div><div class="st">Commencez par <strong>5 minutes minimum</strong> — ne cassez jamais la chaîne</div></li><li class="si"><div class="snum">3</div><div class="st">Associez l'effort à une <strong>récompense immédiate</strong> post-séance</div></li><li class="si"><div class="snum">4</div><div class="st">Après <strong>66 jours</strong> (Lally, 2010), l'habitude devient automatique</div></li></ul></div>
+        <div class="oc reveal"><div class="och"><div class="oic" style="background:rgba(255,107,157,.12)">🧘</div><div><div class="ot">Récupération mentale</div><div class="os">BDNF · Consolidation</div></div></div><ul class="steps"><li class="si"><div class="snum">1</div><div class="st">Planifiez des <strong>jours de repos actif</strong> : marche, étirements</div></li><li class="si"><div class="snum">2</div><div class="st">Dormez 8h minimum les nuits post-entraînement intense</div></li><li class="si"><div class="snum">3</div><div class="st">Gérez votre <strong>stress global</strong> : le surentraînement est aussi cognitif</div></li><li class="si"><div class="snum">4</div><div class="st">20 min de cardio = <strong>boost BDNF</strong> qui améliore motivation & mémoire</div></li></ul></div>
+        <div class="oc reveal"><div class="och"><div class="oic" style="background:rgba(162,155,254,.15)">🏆</div><div><div class="ot">Performance en compétition</div><div class="os">Yerkes-Dodson · Attention</div></div></div><ul class="steps"><li class="si"><div class="snum">1</div><div class="st">Maîtrisez votre <strong>rituel d'activation</strong> pré-compétition</div></li><li class="si"><div class="snum">2</div><div class="st">Si anxieux → <strong>cohérence cardiaque</strong> : 5 sec in, 5 sec out</div></li><li class="si"><div class="snum">3</div><div class="st">Focus sur <strong>1 indicateur clé</strong> pendant la performance</div></li><li class="si"><div class="snum">4</div><div class="st">Visualisation la veille : le cerveau <strong>ne distingue pas</strong> réel/imaginé</div></li></ul></div>
+      </div>
+    </div>
+
+    <div class="tc" id="tc-proto">
+      <div class="pb reveal"><div class="pt">Protocole Deep Work</div><div class="ps">Basé sur l'attention sélective et la charge cognitive — Newport + Miller</div><div class="pr"><div class="pri"><div class="prt">Phase 1 — 10 min</div><div class="pra">Rituel d'entrée : plan écrit, notifications off, intention unique définie</div></div><div class="pri"><div class="prt">Phase 2 — 90 min</div><div class="pra">Travail profond : zéro interruption, 1 seule tâche complexe en focus</div></div><div class="pri"><div class="prt">Phase 3 — 20 min</div><div class="pra">Pause restauratrice : marche, nature, eau — pas d'écrans ni réseaux</div></div><div class="pri"><div class="prt">Phase 4 — 5 min</div><div class="pra">Debriefing : qu'ai-je accompli ? Prochain bloc planifié et noté</div></div></div></div>
+      <div class="pb reveal"><div class="pt">Protocole Dopamine Reset</div><div class="ps">Pour restaurer la motivation et la sensibilité aux récompenses — Huberman Lab</div><div class="pr"><div class="pri"><div class="prt">Matin</div><div class="pra">10-15 min de lumière naturelle directe dans les 30 min post-réveil</div></div><div class="pri"><div class="prt">Journée</div><div class="pra">Évitez les sources haute dopamine non méritée : réseaux, snacks, doom-scroll</div></div><div class="pri"><div class="prt">Effort</div><div class="pra">Associez le travail difficile à un plaisir différé — jamais pendant l'effort</div></div><div class="pri"><div class="prt">Soir</div><div class="pra">1 jour/semaine : pas de stimulants numériques. Silence, lecture, nature</div></div></div></div>
+      <div class="pb reveal"><div class="pt">Protocole BDNF Quotidien</div><div class="ps">Maximiser la neurogénèse et la plasticité cérébrale chaque jour</div><div class="pr"><div class="pri"><div class="prt">Timing</div><div class="pra">Exercice le matin, avant toute session de travail cognitif intense</div></div><div class="pri"><div class="prt">Type</div><div class="pra">Cardio modéré : course, vélo, marche rapide — 20 à 30 minutes</div></div><div class="pri"><div class="prt">Intensité</div><div class="pra">Zone 2 : vous devez pouvoir parler mais être légèrement essoufflé</div></div><div class="pri"><div class="prt">Résultat</div><div class="pra">+20% de concentration et rétention dans les 2h post-exercice</div></div></div></div>
+    </div>
+
+    <div class="tc" id="tc-map">
+      <div class="map-wrap reveal">
+        <div class="map-title">Carte d'impact des lois par domaine</div>
+        <div id="mapContent"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ROUTINES -->
+<div id="pg-routines" class="pg">
+  <div class="ph">
+    <div class="lbl">// Systèmes quotidiens</div>
+    <h2 class="ttl">Routines Neuro-Optimisées</h2>
+    <p class="sub">Des systèmes quotidiens conçus pour activer les bons circuits neurologiques au bon moment de la journée.</p>
+  </div>
+  <div class="wrap">
+    <div class="rsel">
+      <div class="rb on" onclick="showR('morning',this)"><div class="rb-ic">🌅</div><div class="rb-t">Routine Matinale</div><div class="rb-d">Activez votre cortex préfrontal et boostez le BDNF dès le réveil pour une journée optimale</div></div>
+      <div class="rb" onclick="showR('work',this)"><div class="rb-ic">⚡</div><div class="rb-t">Session de Travail</div><div class="rb-d">Maximisez la concentration, la charge cognitive utile et le flow de 90 minutes</div></div>
+      <div class="rb" onclick="showR('evening',this)"><div class="rb-ic">🌙</div><div class="rb-t">Routine du Soir</div><div class="rb-d">Préparez votre cerveau pour la consolidation mémorielle nocturne profonde</div></div>
+    </div>
+
+    <div class="rd on" id="rd-morning">
+      <div class="rplan">
+        <div class="rph"><div class="rpt">🌅 Routine Matinale — 90 minutes</div><div class="rps">De 6h00 à 7h30 · Objectif : activation cognitive maximale avant toute tâche</div></div>
+        <div class="tl">
+          <div class="tli reveal"><div class="tll"><div class="tltime">06:00</div><div class="tldot"></div><div class="tlline"></div></div><div class="tlr"><div class="tlt">Réveil sans écran</div><div class="tld">Évitez le téléphone pendant 30 minutes après le réveil. La dopamine matinale doit être méritée, non volée par les notifications. Ce seul geste change la chimie de votre journée.</div><div class="tltags"><span class="tltag">Loi Dopamine</span><span class="tltag p">5 min</span></div></div></div>
+          <div class="tli reveal"><div class="tll"><div class="tltime">06:05</div><div class="tldot"></div><div class="tlline"></div></div><div class="tlr"><div class="tlt">Hydratation + Lumière naturelle</div><div class="tld">Buvez 500ml d'eau immédiatement. Sortez ou ouvrez une fenêtre : 10 min de lumière naturelle directe synchronisent l'horloge circadienne et initient le pic de cortisol matinal optimal.</div><div class="tltags"><span class="tltag g">Neurotransmetteurs</span><span class="tltag p">10 min</span></div></div></div>
+          <div class="tli reveal"><div class="tll"><div class="tltime">06:20</div><div class="tldot"></div><div class="tlline"></div></div><div class="tlr"><div class="tlt">Exercice physique</div><div class="tld">20-30 minutes de cardio modéré (marche rapide, vélo, course). Libère le BDNF — le "Miracle-Gro du cerveau" — augmente dopamine et sérotonine. C'est le meilleur booster cognitif connu.</div><div class="tltags"><span class="tltag">Loi BDNF</span><span class="tltag p">30 min</span></div></div></div>
+          <div class="tli reveal"><div class="tll"><div class="tltime">06:55</div><div class="tldot"></div><div class="tlline"></div></div><div class="tlr"><div class="tlt">Journal matinal (3 questions)</div><div class="tld">1. Qu'est-ce que je veux accomplir aujourd'hui ? 2. Quelle loi neuro je vais activer ? 3. Mon niveau d'énergie (1-10) ? L'écriture active le cortex préfrontal et oriente l'attention.</div><div class="tltags"><span class="tltag">Attention sélective</span><span class="tltag p">10 min</span></div></div></div>
+          <div class="tli reveal"><div class="tll"><div class="tltime">07:10</div><div class="tldot"></div><div class="tlline"></div></div><div class="tlr"><div class="tlt">Révision Ebbinghaus</div><div class="tld">15 minutes de révision espacée des cartes du jour (Anki ou flashcards). Le cerveau post-exercice absorbe mieux les nouvelles connexions synaptiques — timing parfait.</div><div class="tltags"><span class="tltag">Ebbinghaus</span><span class="tltag">Hebb</span><span class="tltag p">15 min</span></div></div></div>
+          <div class="tli reveal"><div class="tll"><div class="tltime">07:25</div><div class="tldot"></div><div class="tlline"></div></div><div class="tlr"><div class="tlt">Planification du bloc principal</div><div class="tld">Définissez 1 seule tâche prioritaire. Découpez-la en 3-4 étapes max (charge cognitive). Pas plus. Cette intention unique oriente le réseau attentionnel pour toute la matinée.</div><div class="tltags"><span class="tltag">Charge cognitive</span><span class="tltag g">Prêt ✓</span></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rd" id="rd-work">
+      <div class="rplan">
+        <div class="rph"><div class="rpt">⚡ Session de Travail Profond — 110 min</div><div class="rps">Le bloc cognitif optimal · Basé sur les rythmes ultradiens de 90 minutes</div></div>
+        <div class="tl">
+          <div class="tli reveal"><div class="tll"><div class="tltime">T+0</div><div class="tldot"></div><div class="tlline"></div></div><div class="tlr"><div class="tlt">Rituel d'entrée en focus</div><div class="tld">Même playlist, même lieu, même position. Le cerveau reconnaît les déclencheurs contextuels et entre plus vite en état de concentration (conditionnement Hebb). Construisez ce rituel.</div><div class="tltags"><span class="tltag">Hebb</span><span class="tltag p">5 min</span></div></div></div>
+          <div class="tli reveal"><div class="tll"><div class="tltime">T+5</div><div class="tldot"></div><div class="tlline"></div></div><div class="tlr"><div class="tlt">Travail profond — Phase 1</div><div class="tld">45 minutes de travail intense sur une seule tâche. Zéro interruption. Téléphone en mode avion. Cerveau en mode flow — zone optimale de Yerkes-Dodson pour les tâches complexes.</div><div class="tltags"><span class="tltag">Attention sélective</span><span class="tltag">Yerkes-Dodson</span><span class="tltag p">45 min</span></div></div></div>
+          <div class="tli reveal"><div class="tll"><div class="tltime">T+50</div><div class="tldot"></div><div class="tlline"></div></div><div class="tlr"><div class="tlt">Mini-pause neurologique</div><div class="tld">10 minutes : levez-vous, regardez au loin (réinitialise le nerf optique), hydratez-vous. Pas de réseaux sociaux — ils consommeraient toute la dopamine restante pour le second bloc.</div><div class="tltags"><span class="tltag g">Reset cognitif</span><span class="tltag p">10 min</span></div></div></div>
+          <div class="tli reveal"><div class="tll"><div class="tltime">T+60</div><div class="tldot"></div><div class="tlline"></div></div><div class="tlr"><div class="tlt">Travail profond — Phase 2</div><div class="tld">45 minutes supplémentaires. Le cerveau est maintenant "chaud". C'est souvent ici que les meilleures idées émergent — le mode par défaut a traité les données pendant la pause.</div><div class="tltags"><span class="tltag">Deep Work</span><span class="tltag p">45 min</span></div></div></div>
+          <div class="tli reveal"><div class="tll"><div class="tltime">T+105</div><div class="tldot"></div><div class="tlline"></div></div><div class="tlr"><div class="tlt">Clôture & micro-victoire</div><div class="tld">5 min : notez ce que vous avez accompli. Cochez la tâche. Cette micro-victoire libère de la dopamine et renforce la boucle motivationnelle pour le prochain bloc et pour demain.</div><div class="tltags"><span class="tltag">Dopamine</span><span class="tltag g">Complété ✓</span></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rd" id="rd-evening">
+      <div class="rplan">
+        <div class="rph"><div class="rpt">🌙 Routine du Soir — 60 minutes</div><div class="rps">De 21h30 à 22h30 · Objectif : consolidation mémorielle nocturne maximale</div></div>
+        <div class="tl">
+          <div class="tli reveal"><div class="tll"><div class="tltime">21:30</div><div class="tldot"></div><div class="tlline"></div></div><div class="tlr"><div class="tlt">Fin des écrans lumineux</div><div class="tld">La lumière bleue supprime la mélatonine jusqu'à 3h après exposition. Activez le mode nuit. Pas d'écrans = 40% de sommeil profond en plus = consolidation mémorielle complète.</div><div class="tltags"><span class="tltag">Consolidation</span><span class="tltag p">Immédiat</span></div></div></div>
+          <div class="tli reveal"><div class="tll"><div class="tltime">21:35</div><div class="tldot"></div><div class="tlline"></div></div><div class="tlr"><div class="tlt">Journal de bord — Bilan</div><div class="tld">1. Quelle loi ai-je appliquée ? 2. Ce qui a fonctionné / pas fonctionné ? 3. Ma principale victoire du jour. L'écriture ancre les apprentissages dans la mémoire épisodique.</div><div class="tltags"><span class="tltag">Hebb</span><span class="tltag g">Mémoire épisodique</span><span class="tltag p">15 min</span></div></div></div>
+          <div class="tli reveal"><div class="tll"><div class="tltime">21:50</div><div class="tldot"></div><div class="tlline"></div></div><div class="tlr"><div class="tlt">Révision légère (flashcards)</div><div class="tld">10-15 minutes de révision Anki. Le cerveau va traiter ces informations cette nuit. C'est la révision la plus rentable de la journée — ROI maximal par heure investie.</div><div class="tltags"><span class="tltag">Ebbinghaus</span><span class="tltag p">15 min</span></div></div></div>
+          <div class="tli reveal"><div class="tll"><div class="tltime">22:10</div><div class="tldot"></div><div class="tlline"></div></div><div class="tlr"><div class="tlt">Lecture ou cohérence cardiaque</div><div class="tld">20 min de lecture (pas de news stressantes). Ou respiration : 5 sec inspiration, 5 sec expiration. Réduit le cortisol, abaisse la fréquence cardiaque, prépare au sommeil profond.</div><div class="tltags"><span class="tltag g">Récupération</span><span class="tltag p">20 min</span></div></div></div>
+          <div class="tli reveal"><div class="tll"><div class="tltime">22:30</div><div class="tldot"></div><div class="tlline"></div></div><div class="tlr"><div class="tlt">Sommeil — La consolidation commence</div><div class="tld">L'hippocampe transfère les souvenirs vers le cortex. Chaque cycle de 90 min traite une couche d'apprentissage. 8h = 5 cycles = mémoire long terme gravée durablement.</div><div class="tltags"><span class="tltag">Consolidation</span><span class="tltag">BDNF</span><span class="tltag g">8h cible</span></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<div id="pg-about" class="pg">
+  <div class="ph" style="max-width:900px;">
+    <div class="lbl">// À propos</div>
+    <h2 class="ttl">Pourquoi NeuroCode ?</h2>
+    <p class="sub">Un outil de transformation personnelle fondé sur la neuroscience moderne. Pas de motivation superficielle — de la biologie appliquée à vos objectifs réels.</p>
+  </div>
+  <div class="wrap" style="max-width:900px;">
+    <div class="manifesto reveal"><p>Votre cerveau est le seul outil dont vous aurez jamais besoin. Comprendre ses lois, c'est obtenir le manuel d'utilisation de votre propre performance — et cesser de lutter contre votre propre biologie.</p></div>
+    <div class="pgrid2">
+      <div class="pill reveal"><div class="pill-ic">🔬</div><div class="pill-t">Science avant tout</div><div class="pill-tx">Chaque loi présentée ici est soutenue par des études publiées dans des journaux à comité de lecture. Pas de pseudo-science, pas de "hacks" non prouvés.</div></div>
+      <div class="pill reveal"><div class="pill-ic">⚙️</div><div class="pill-t">Actionnabilité</div><div class="pill-tx">Une loi sans application n'est qu'un fait. Chaque principe est traduit en comportement quotidien concret, mesurable, ajustable selon votre contexte.</div></div>
+      <div class="pill reveal"><div class="pill-ic">🎯</div><div class="pill-t">Personnalisation</div><div class="pill-tx">Ces outils s'adaptent à votre domaine : trading, sport, apprentissage académique, entrepreneuriat. La biologie est universelle, l'application est votre choix.</div></div>
+      <div class="pill reveal"><div class="pill-ic">📈</div><div class="pill-t">Progrès mesurable</div><div class="pill-tx">Le cerveau se remodèle lentement mais sûrement. La régularité prime sur l'intensité. Petits progrès quotidiens, résultats exponentiels dans le temps.</div></div>
+    </div>
+    <div class="tracker-sec reveal">
+      <div style="font-family:'Playfair Display',serif;font-size:1.35rem;margin-bottom:.4rem;">Tracker de pratique quotidienne</div>
+      <div style="font-size:.68rem;color:var(--muted);margin-bottom:2rem;">Cochez les lois que vous avez appliquées aujourd'hui — votre consistance est votre superpower</div>
+      <div class="tgrid" id="tgrid"></div>
+    </div>
+    <div class="refs reveal">
+      <div class="refs-t">Sources & Références scientifiques</div>
+      <ul class="rlist">
+        <li class="ri"><div class="rb2"></div><div class="rt">Hebb, D.O. (1949). <em>The Organization of Behavior.</em> Wiley — Base de la plasticité synaptique</div></li>
+        <li class="ri"><div class="rb2"></div><div class="rt">Ebbinghaus, H. (1885). <em>Über das Gedächtnis.</em> — Courbe de l'oubli et répétition espacée</div></li>
+        <li class="ri"><div class="rb2"></div><div class="rt">Yerkes, R.M. & Dodson, J.D. (1908). <em>Journal of Comparative Neurology.</em> — Loi performance/arousal</div></li>
+        <li class="ri"><div class="rb2"></div><div class="rt">Ratey, J.J. (2008). <em>Spark: The Revolutionary New Science of Exercise and the Brain.</em> — BDNF & exercice</div></li>
+        <li class="ri"><div class="rb2"></div><div class="rt">Miller, G.A. (1956). <em>The Magical Number Seven.</em> Psychological Review — Charge cognitive</div></li>
+        <li class="ri"><div class="rb2"></div><div class="rt">Walker, M. (2017). <em>Why We Sleep.</em> Scribner — Consolidation mémorielle & sommeil profond</div></li>
+        <li class="ri"><div class="rb2"></div><div class="rt">Huberman, A. (2021-2024). <em>Huberman Lab Podcast.</em> Stanford — Dopamine & protocoles neuro-pratiques</div></li>
+        <li class="ri"><div class="rb2"></div><div class="rt">Newport, C. (2016). <em>Deep Work.</em> Grand Central — Attention sélective & travail profond</div></li>
+        <li class="ri"><div class="rb2"></div><div class="rt">Lally, P. et al. (2010). <em>How habits are formed.</em> European Journal of Social Psychology — Durée de formation des habitudes</div></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+// CURSOR
+const cur=document.getElementById('cur'), ring=document.getElementById('ring');
+document.addEventListener('mousemove',e=>{
+  cur.style.left=e.clientX+'px';cur.style.top=e.clientY+'px';
+  setTimeout(()=>{ring.style.left=e.clientX+'px';ring.style.top=e.clientY+'px';},65);
+});
+document.querySelectorAll('button,a,.lc,.pc,.oc,.rb,.tcard').forEach(el=>{
+  el.addEventListener('mouseenter',()=>cur.classList.add('h'));
+  el.addEventListener('mouseleave',()=>cur.classList.remove('h'));
+});
+
+// DATA
+const laws=[
+  {n:'01',ic:'⚡',nm:'Loi de Hebb',sb:'Plasticité synaptique',ac:'#7c6af7',
+   ds:'Les neurones qui s\'activent ensemble se connectent ensemble. La répétition renforce les connexions neuronales et consolide les apprentissages. C\'est la base biologique de toute habitude et de tout apprentissage durable.',
+   ap:'Répétez chaque nouvelle compétence quotidiennement pendant 21 à 66 jours pour créer des autoroutes neuronales durables. La régularité prime toujours sur l\'intensité.'},
+  {n:'02',ic:'🧠',nm:'Loi de Yerkes-Dodson',sb:'Performance & arousal',ac:'#e05aff',
+   ds:'Il existe un niveau optimal de stimulation pour la performance. Trop peu de stress produit l\'apathie. Trop produit la paralysie. La zone optimale varie selon la complexité de la tâche à accomplir.',
+   ap:'Pour les tâches complexes (trading, analyse), maintenez un stress modéré. Pour les tâches simples, augmentez l\'enjeu pour rester vigilant. Connaissez votre zone optimale.'},
+  {n:'03',ic:'🔄',nm:'Loi de la Consolidation',sb:'Mémoire & sommeil',ac:'#00e5c0',
+   ds:'La mémoire se consolide pendant le sommeil. Les informations transitent de l\'hippocampe au cortex lors des cycles de sommeil profond (NREM). Sans sommeil de qualité, l\'apprentissage ne persiste pas.',
+   ap:'Dormez 7-9h après chaque session d\'apprentissage intensif. Évitez les écrans 1h avant le coucher. Révisez le soir : le cerveau traitera ces informations cette nuit.'},
+  {n:'04',ic:'🎯',nm:'Loi de l\'Attention Sélective',sb:'Focus & filtrage',ac:'#f7a76a',
+   ds:'Le cerveau ne peut traiter consciemment qu\'un seul flux d\'information complexe à la fois. Le multitâche est impossible — il s\'agit d\'une commutation rapide qui coûte 40% de productivité.',
+   ap:'Utilisez des blocs de 90 min de travail profond sans interruption. Désactivez toutes les notifications. Écrivez votre intention. Un seul objectif par bloc, sans exception.'},
+  {n:'05',ic:'🔁',nm:'Courbe d\'Ebbinghaus',sb:'Révision espacée',ac:'#ff6b9d',
+   ds:'Sans révision, on oublie 70% d\'une information en 24 heures. La répétition espacée (J+1, J+7, J+30) multiplie par 4 la rétention à long terme en exploitant l\'effet de test.',
+   ap:'Utilisez Anki ou des flashcards avec intervalles croissants. Révisez le soir avant de dormir et le matin après l\'exercice pour deux consolidations par cycle.'},
+  {n:'06',ic:'⚖️',nm:'Loi de la Charge Cognitive',sb:'Capacité de traitement',ac:'#4ecdc4',
+   ds:'La mémoire de travail ne peut gérer que 4 ± 1 éléments simultanément (Miller revisité). Surcharger ce système bloque l\'apprentissage, la créativité et la prise de décision.',
+   ap:'Découpez tout objectif en sous-tâches de 4 étapes max. Externalisez vers des listes écrites pour libérer votre RAM mentale. Simplifiez radicalement vos critères de décision.'},
+  {n:'07',ic:'🌊',nm:'Loi de la Neuroplasticité',sb:'Adaptation cérébrale',ac:'#a29bfe',
+   ds:'Le cerveau se remodèle en réponse à l\'expérience tout au long de la vie. La nouveauté, le défi progressif et la répétition sont les trois déclencheurs de la croissance neuronale.',
+   ap:'Exposez-vous régulièrement à des défis légèrement au-dessus de votre niveau actuel. L\'inconfort contrôlé est le signal de la croissance. Cherchez le défi, fuyez le confort.'},
+  {n:'08',ic:'💊',nm:'Loi de la Dopamine',sb:'Motivation & anticipation',ac:'#fd79a8',
+   ds:'La dopamine ne récompense pas — elle anticipe. Elle est libérée avant l\'événement plaisant, pas après. C\'est le moteur de la motivation. Les micro-victoires alimentent ce flux.',
+   ap:'Célébrez chaque petite avancée. Découpez vos objectifs en jalons de 24-48h. Reliez votre effort à votre futur imaginé pour activer l\'anticipation dopaminergique.'},
+  {n:'09',ic:'🌿',nm:'Loi du BDNF',sb:'Exercice & cognition',ac:'#55efc4',
+   ds:'L\'exercice physique déclenche la libération de BDNF (Brain-Derived Neurotrophic Factor), le "Miracle-Gro du cerveau". Il favorise la neurogénèse, la plasticité et la connexion synaptique.',
+   ap:'20-30 min de cardio modéré avant une session d\'étude augmente la concentration et la rétention de 20%. Marchez, courez, pédalez — quotidiennement, le matin de préférence.'},
+];
+
+// HOME PREVIEW
+const pvGrid=document.getElementById('pvGrid');
+laws.slice(0,6).forEach((l,i)=>{
+  const el=document.createElement('div');
+  el.className='pc reveal';
+  el.style.cssText=`--ca:${l.ac}`;
+  el.innerHTML=`<div class="pn">// ${l.n}</div><div class="pi">${l.ic}</div><div class="pname">${l.nm}</div><div class="ptag">${l.sb}</div>`;
+  el.onclick=()=>go('laws');
+  pvGrid.appendChild(el);
+});
+
+// LAWS GRID
+const lwGrid=document.getElementById('lwGrid');
+laws.forEach(l=>{
+  const el=document.createElement('div');
+  el.className='lc reveal';
+  el.style.cssText=`--ca:${l.ac}`;
+  el.innerHTML=`<div class="cn">// ${l.n}</div><div class="ci">${l.ic}</div><div class="cname">${l.nm}</div><div class="csub">${l.sb}</div><p class="cdesc">${l.ds}</p><div class="cbox"><div class="cbox-l">→ Application pratique</div><div class="cbox-t">${l.ap}</div></div>`;
+  el.addEventListener('mousemove',e=>{
+    const r=el.getBoundingClientRect();
+    el.style.setProperty('--mx',((e.clientX-r.left)/r.width*100)+'%');
+    el.style.setProperty('--my',((e.clientY-r.top)/r.height*100)+'%');
+  });
+  lwGrid.appendChild(el);
+});
+
+// MAP
+const mapData=[
+  {nm:'Loi de Hebb',trading:85,apprentissage:95,sport:80,discipline:90},
+  {nm:'Yerkes-Dodson',trading:95,apprentissage:70,sport:88,discipline:75},
+  {nm:'Consolidation',trading:70,apprentissage:95,sport:75,discipline:80},
+  {nm:'Attention',trading:90,apprentissage:85,sport:70,discipline:85},
+  {nm:'Ebbinghaus',trading:65,apprentissage:98,sport:55,discipline:70},
+  {nm:'Charge cognitive',trading:88,apprentissage:80,sport:65,discipline:75},
+  {nm:'Neuroplasticité',trading:75,apprentissage:90,sport:92,discipline:88},
+  {nm:'Dopamine',trading:92,apprentissage:78,sport:85,discipline:95},
+  {nm:'BDNF',trading:68,apprentissage:82,sport:98,discipline:80},
+];
+const colors={trading:'#7c6af7',apprentissage:'#00e5c0',sport:'#e05aff',discipline:'#f7a76a'};
+const mc=document.getElementById('mapContent');
+const mh=document.createElement('div');
+mh.style.cssText='display:flex;gap:1px;margin-bottom:4px;';
+mh.innerHTML='<div style="width:175px;flex-shrink:0;"></div>'+Object.keys(colors).map(k=>`<div style="flex:1;text-align:center;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:${colors[k]};padding:.5rem;">${k}</div>`).join('');
+mc.appendChild(mh);
+mapData.forEach(row=>{
+  const div=document.createElement('div');
+  div.className='map-row';
+  div.innerHTML=`<div class="map-lname">${row.nm}</div><div class="map-bars">`+
+    Object.keys(colors).map(k=>`<div class="map-bar" style="width:${row[k]}%;background:${colors[k]};opacity:${.25+row[k]/130};">${row[k]}%</div>`).join('')+
+  `</div>`;
+  mc.appendChild(div);
+});
+
+// TRACKER
+const tgrid=document.getElementById('tgrid');
+const tnames=['Hebb','Yerkes-Dodson','Consolidation','Attention','Ebbinghaus','Charge cogn.','Neuroplasticité','Dopamine','BDNF'];
+const saved=JSON.parse(localStorage.getItem('nc_t')||'{}');
+tnames.forEach(name=>{
+  const pct=Math.floor(Math.random()*35+50);
+  const done=saved[name]||false;
+  const el=document.createElement('div');
+  el.className='tcard';
+  el.innerHTML=`<div class="tlaw">${name}</div><div class="tbg"><div class="tfill" style="width:${done?100:pct}%"></div></div><div class="tpct" id="tp-${name.replace(/[^a-z]/gi,'')}">${done?'Fait ✓':'Consistance: '+pct+'%'}</div><label class="tchk"><input type="checkbox" ${done?'checked':''} onchange="chkT('${name}',this.checked,'${pct}')"> Fait aujourd'hui</label>`;
+  tgrid.appendChild(el);
+});
+function chkT(name,v,pct){
+  const d=JSON.parse(localStorage.getItem('nc_t')||'{}');
+  d[name]=v;localStorage.setItem('nc_t',JSON.stringify(d));
+  const card=event.target.closest('.tcard');
+  card.querySelector('.tfill').style.width=v?'100%':pct+'%';
+  card.querySelector('.tpct').textContent=v?'Fait ✓':'Consistance: '+pct+'%';
+}
+
+// PAGE NAV
+function go(id){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.nl').forEach(a=>a.classList.remove('on'));
+  document.getElementById('pg-'+id).classList.add('on');
+  document.querySelector(`[data-p="${id}"]`).classList.add('on');
+  window.scrollTo(0,0);
+  setTimeout(reveal,120);
+}
+
+// TAB NAV
+function showTab(id,btn){
+  document.querySelectorAll('.tc').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('tc-'+id).classList.add('on');
+  btn.classList.add('on');
+  setTimeout(reveal,100);
+}
+
+// ROUTINE
+function showR(id,btn){
+  document.querySelectorAll('.rd').forEach(r=>r.classList.remove('on'));
+  document.querySelectorAll('.rb').forEach(b=>b.classList.remove('on'));
+  document.getElementById('rd-'+id).classList.add('on');
+  btn.classList.add('on');
+  setTimeout(reveal,100);
+}
+
+// REVEAL
+function reveal(){
+  document.querySelectorAll('.reveal:not(.vis)').forEach(el=>{
+    const r=el.getBoundingClientRect();
+    if(r.top<window.innerHeight-50)el.classList.add('vis');
+  });
+}
+window.addEventListener('scroll',reveal);
+setTimeout(reveal,200);
+</script>
+</body>
+</html>
